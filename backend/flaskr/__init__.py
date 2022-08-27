@@ -45,6 +45,24 @@ def create_app(test_config=None):
         return jsonify({
             "categories": data
         })
+    
+    @app.route('/categories', methods=['POST'])
+    def create_category():
+        body = request.get_json()
+        type = body.get('type', None)
+        try:
+            # check if request input is empty
+            if type == "":
+                abort(400)
+
+            category = Category(type=type)
+            category.insert()
+
+            return jsonify({
+                "success": True
+            })
+        except:
+            abort(422)
 
     @app.route('/questions')
     def get_questions():
@@ -92,9 +110,11 @@ def create_app(test_config=None):
         category = body.get('category', None)
 
         try:
-            if len(answer) > 0 or len(question) > 0:
+            if question == None and answer == None:
+                abort(400)
+            # check if request input is not empty
+            if answer != "" and question != "":
                 question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
-
                 question.insert()
                 return jsonify({
                 'success' : True
@@ -103,18 +123,6 @@ def create_app(test_config=None):
                 abort(400)
         except:
             abort(422)
-        
-
-    """
-    @TODO:
-    Create an endpoint to POST a new question,
-    which will require the question and answer text,
-    category, and difficulty score.
-
-    TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will appear at the end of the last page
-    of the questions list in the "List" tab.
-    """
 
 
 
@@ -123,6 +131,9 @@ def create_app(test_config=None):
         try:
             body = request.get_json()
             searchTerm = body.get('searchTerm', None)
+
+            if searchTerm == None:
+                abort(400)
 
             question = Question.query.filter(Question.question.ilike("%" + searchTerm + "%")).all()
 
@@ -136,18 +147,7 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-        
 
-    """
-    @TODO:
-    Create a POST endpoint to get questions based on a search term.
-    It should return any questions for whom the search term
-    is a substring of the question.
-
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
-    Try using the word "title" to start.
-    """
 
     @app.route('/categories/<int:id>/questions')
     def get_by_category(id):
@@ -165,14 +165,6 @@ def create_app(test_config=None):
             "currentCategory": category.type
         })
             
-    """
-    @TODO:
-    Create a GET endpoint to get questions based on category.
-
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    """
 
     @app.route('/quizzes', methods=['POST'])
     def quiz():
@@ -203,7 +195,6 @@ def create_app(test_config=None):
             else:
                 # generating a random question selection
                 randomNumber = random.randint(0, (total_questions - 1))
-                print(question[randomNumber])
                 quiz_question = question[randomNumber]
 
             return jsonify({
@@ -211,18 +202,8 @@ def create_app(test_config=None):
                 })
         except:
             abort(422)
-    """
-    @TODO:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
 
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    """
-
+    #  all error handlers
 
     @app.errorhandler(400)
     def bad_request(error):
@@ -255,13 +236,6 @@ def create_app(test_config=None):
             'error' : 500,
             'message' : 'Internal Server Error'
         }), 500)
-
-
-    """
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422.
-    """
 
     return app
 

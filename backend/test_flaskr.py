@@ -26,7 +26,10 @@ class TriviaTestCase(unittest.TestCase):
             self.db.create_all()
 
         self.new_question = {
-            "question": "The World Best Web developer", "answer": "Deyo", "diffculity": 2, "category": 1
+            "question": "The best programmer", "answer": "Deyo", "diffculity": 2, "category": 1
+        }
+        self.new_question_error = {
+            "question": "", "answer": "Deyo", "diffculity": 2, "category": 1
         }
     
     def tearDown(self):
@@ -39,6 +42,20 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data["categories"])
+
+    def test_adding_new_category(self):
+        res = self.client().post("/categories", json={"type" : "football"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+
+    def test_error_if_adding_new_category_failed(self):
+        res = self.client().post("/categories", json={"type" : ""})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
 
     def test_get_questions_and_categories(self):
         res = self.client().get("/questions")
@@ -59,14 +76,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Resource Not Found")
 
     def test_deleting_a_question(self):
-        res = self.client().delete("/questions/18")
+        res = self.client().delete("/questions/35")
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
 
     def test_422_if_question_doesnt_exist(self):
-        res = self.client().delete("/questions/16")
+        res = self.client().delete("/questions/160")
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
@@ -79,6 +96,64 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
+
+    def test_422_if_adding_a_question_failed(self):
+        res = self.client().post("/questions", json=self.new_question_error)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
+    def test_searching_for_a_question(self):
+        res = self.client().post("/questions/search", json={"searchTerm" : "the"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["questions"])
+        self.assertTrue(data["totalQuestions"])
+        self.assertTrue(data["currentCategory"])
+
+    def test_error_searching_for_a_question_failed(self):
+        res = self.client().post("/questions/search", json={})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
+    def test_getting_questions_by_category(self):
+        res = self.client().get("/categories/1/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["questions"])
+        self.assertTrue(data["totalQuestions"])
+        self.assertTrue(data["currentCategory"])
+
+    def test_error_if_getting_questions_by_category_failed(self):
+        res = self.client().get("/categories/26/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
+    def test_getting_quiz_questions(self):
+        res = self.client().post("/quizzes", json={ "previous_questions": [20], "quiz_category": { "id": 1, "type" : "science" }})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["question"])
+
+    def test_error_if_getting_quiz_questions_failed(self):
+        res = self.client().post("/quizzes", json={ "previous_questions": [], "quiz_category": {}})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+
+    
+
+
+    
 
     """
     TODO

@@ -73,7 +73,7 @@ You will need to provide detailed documentation of your API endpoints including 
 
 ### Documentation Example
 
-`GET '/api/v1.0/categories'`
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
@@ -87,6 +87,151 @@ You will need to provide detailed documentation of your API endpoints including 
   "4": "History",
   "5": "Entertainment",
   "6": "Sports"
+}
+```
+
+`POST '/categories'`
+
+- Creates a new category
+- Request body:
+
+```json
+{ "type": "Football" }
+```
+
+- Returns: An object with a single key, `success` and Value, `True`.
+
+```json
+{
+  "success": True
+}
+```
+
+`GET '/questions'`
+
+- Fetches a paginated set of questions
+- Request arguments: `page` an integer, default is 1
+- Returns: An object with 10 pagnated questions, total questions, object including all categories, and current category string.
+
+````json
+{
+  {
+  "questions": [
+    {
+      "id": 1,
+      "question": "This is a question",
+      "answer": "This is an answer",
+      "difficulty": 5,
+      "category": 2
+    }
+  ],
+  "totalQuestions": 100,
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "currentCategory": "History"
+}
+}
+
+`POST '/questions'`
+- Creates a new questions
+- Request body:
+``` json
+{
+  "question": "Heres a new question string",
+  "answer": "Heres a new answer string",
+  "difficulty": 1,
+  "category": 3
+}
+````
+
+- Returns: An object with a single key, `success` and Value, `True`.
+
+```json
+{
+  "success": True
+}
+```
+
+`DELETE '/questions/{id}'`
+
+- Delete a specified question by the id from the request argument
+- Request argument: `id` - integer
+- Returns: An object with a single key, `success` and Value, `True`.
+
+```json
+{
+  "success": True
+}
+```
+
+`POST '/questions/search'`
+
+- Sends a post request to fetch specific question or questions by search term
+- Request body:
+
+```json
+{ "searchTerm": "Enter the search term here" }
+```
+
+- Returns: An object with a single key, `success` and Value, `True`.
+
+```json
+{
+  "success": True
+}
+```
+
+`GET '/categories/{id}/questions'`
+
+- Fetches questions by categories using id in the request argument
+- Request Argurments: `id` - integer
+- Returns: An Object with set of questions for the specified category, total questions, and current category string
+
+```json
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "This is a question",
+      "answer": "This is an answer",
+      "difficulty": 5,
+      "category": 4
+    }
+  ],
+  "totalQuestions": 100,
+  "currentCategory": "History"
+}
+```
+
+`POST '/quizzes'`
+
+- Sends a post request to fetch a random question and without a previously answered question
+- Request body:
+
+```json
+{
+  "previous_questions": [1, 4, 20, 15],
+  "quiz_category": "current category"
+}
+```
+
+- Returns : a new question object
+
+```json
+{
+  "question": {
+    "id": 1,
+    "question": "This is a question",
+    "answer": "This is an answer",
+    "difficulty": 5,
+    "category": 4
+  }
 }
 ```
 
